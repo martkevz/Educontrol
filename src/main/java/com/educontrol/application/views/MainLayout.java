@@ -1,27 +1,36 @@
 package com.educontrol.application.views;
 
+import com.educontrol.application.views.modulodeestudiante.ModulodeEstudianteView;
+import com.educontrol.application.views.moduloasignatura.ModuloAsignaturaView;
+import com.educontrol.application.views.moduloPeriodoAcadémico.ModuloPeriodoAcadémicoView;
+import com.educontrol.application.views.modulodeprofesor.ModulodeProfesorView;
+import com.educontrol.application.views.modulogrupo.ModuloGrupoView;
+import com.educontrol.application.views.modulohorario.ModuloHorarioView;
+import com.educontrol.application.views.modulodeasistencia.ModulodeAsistenciaView;
+
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.html.Footer;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Header;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
-import com.vaadin.flow.router.Layout;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.flow.server.menu.MenuConfiguration;
-import com.vaadin.flow.server.menu.MenuEntry;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import java.util.List;
+import org.vaadin.lineawesome.LineAwesomeIcon;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
+
 
 /**
  * The main view is a top-level placeholder for other views.
  */
-@Layout
+/**@Layout
 @AnonymousAllowed
+public class MainLayout extends AppLayout {**/
+
+@Route("")
 public class MainLayout extends AppLayout {
 
     private H1 viewTitle;
@@ -34,7 +43,7 @@ public class MainLayout extends AppLayout {
 
     private void addHeaderContent() {
         DrawerToggle toggle = new DrawerToggle();
-        toggle.setAriaLabel("Menu toggle");
+        toggle.setAriaLabel("Menu principal");
 
         viewTitle = new H1();
         viewTitle.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
@@ -54,16 +63,20 @@ public class MainLayout extends AppLayout {
 
     private SideNav createNavigation() {
         SideNav nav = new SideNav();
-
-        List<MenuEntry> menuEntries = MenuConfiguration.getMenuEntries();
-        menuEntries.forEach(entry -> {
-            if (entry.icon() != null) {
-                nav.addItem(new SideNavItem(entry.title(), entry.path(), new SvgIcon(entry.icon())));
-            } else {
-                nav.addItem(new SideNavItem(entry.title(), entry.path()));
-            }
-        });
-
+        nav.addItem
+        (new SideNavItem("Modulo Estudiantes", ModulodeEstudianteView.class, LineAwesomeIcon.USER.create()));
+        nav.addItem
+        (new SideNavItem("Modulo Profesores", ModulodeProfesorView.class, LineAwesomeIcon.CHALKBOARD_TEACHER_SOLID.create()));
+        nav.addItem
+        (new SideNavItem("Modulo Periodos", ModuloPeriodoAcadémicoView.class, LineAwesomeIcon.CALENDAR_SOLID.create()));
+        nav.addItem
+        (new SideNavItem("Modulo Asignaturas", ModuloAsignaturaView.class, LineAwesomeIcon.BOOK_SOLID.create()));
+        nav.addItem
+        (new SideNavItem("Modulo Horarios", ModuloHorarioView.class, LineAwesomeIcon.CLOCK_SOLID.create()));
+        nav.addItem
+        (new SideNavItem("Modulo Grupos", ModuloGrupoView.class, LineAwesomeIcon.USER.create()));
+        nav.addItem
+        (new SideNavItem("Modulo Asistencias", ModulodeAsistenciaView.class, LineAwesomeIcon.CALENDAR_TIMES.create()));
         return nav;
     }
 
@@ -80,6 +93,7 @@ public class MainLayout extends AppLayout {
     }
 
     private String getCurrentPageTitle() {
-        return MenuConfiguration.getPageHeader(getContent()).orElse("");
+        PageTitle title = getContent().getClass().getAnnotation(PageTitle.class); 
+        return title == null ? "" : title.value(); 
     }
 }

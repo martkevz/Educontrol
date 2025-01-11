@@ -1,61 +1,176 @@
 package com.educontrol.application.views.moduloasignatura;
 
+import com.educontrol.application.controlador.AsignaturaController;
+import com.educontrol.application.controlador.PeriodoAcademicoController;
+import com.educontrol.application.modelos.Asignatura;
+import com.educontrol.application.modelos.PeriodoAcademico;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
+import com.vaadin.flow.spring.annotation.UIScope;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @PageTitle("Modulo Asignatura")
-@Route("person-form2")
-@Menu(order = 2, icon = "line-awesome/svg/user.svg")
+@Route(value = "asignatura-form", layout = com.educontrol.application.views.MainLayout.class)
+@UIScope
 public class ModuloAsignaturaView extends Composite<VerticalLayout> {
 
-    public ModuloAsignaturaView() {
-        VerticalLayout layoutColumn2 = new VerticalLayout();
-        H3 h3 = new H3();
-        FormLayout formLayout2Col = new FormLayout();
-        TextField textField = new TextField();
-        TextField textField2 = new TextField();
-        HorizontalLayout layoutRow = new HorizontalLayout();
-        Button buttonPrimary = new Button();
-        Button buttonSecondary = new Button();
-        getContent().setWidth("100%");
-        getContent().getStyle().set("flex-grow", "1");
-        getContent().setJustifyContentMode(JustifyContentMode.START);
-        getContent().setAlignItems(Alignment.CENTER);
-        layoutColumn2.setWidth("100%");
-        layoutColumn2.setMaxWidth("800px");
-        layoutColumn2.setHeight("min-content");
-        h3.setText("Personal Information");
-        h3.setWidth("100%");
-        formLayout2Col.setWidth("100%");
-        textField.setLabel("Nombre de la asignatura");
-        textField2.setLabel("Código");
-        layoutRow.addClassName(Gap.MEDIUM);
-        layoutRow.setWidth("100%");
-        layoutRow.getStyle().set("flex-grow", "1");
-        buttonPrimary.setText("Save");
-        buttonPrimary.setWidth("min-content");
-        buttonPrimary.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        buttonSecondary.setText("Cancel");
-        buttonSecondary.setWidth("min-content");
-        getContent().add(layoutColumn2);
-        layoutColumn2.add(h3);
-        layoutColumn2.add(formLayout2Col);
-        formLayout2Col.add(textField);
-        formLayout2Col.add(textField2);
-        layoutColumn2.add(layoutRow);
-        layoutRow.add(buttonPrimary);
-        layoutRow.add(buttonSecondary);
+    private final TextField nombreField = new TextField("Nombre de la asignatura");
+    private final TextField codigoField = new TextField("Código");
+    private final ComboBox<PeriodoAcademico> periodoAcademicoComboBox = new ComboBox<>("Período Académico");
+    private final Button saveButton = new Button("Guardar");
+    private final Button deleteButton = new Button("Limpiar formulario");
+    private final Grid<Asignatura> asignaturaGrid = new Grid<>(Asignatura.class);
+
+    private final AsignaturaController asignaturaController;
+    private final PeriodoAcademicoController periodoAcademicoController;
+
+    private Asignatura asignaturaSeleccionada;
+
+    @Autowired
+    public ModuloAsignaturaView(AsignaturaController asignaturaController, PeriodoAcademicoController periodoAcademicoController) {
+        this.asignaturaController = asignaturaController;
+        this.periodoAcademicoController = periodoAcademicoController;
+
+        // Configuración del layout principal
+        H3 title = new H3("Gestión de Asignaturas");
+        FormLayout formLayout = new FormLayout();
+
+        // Configurar ComboBox para seleccionar el período académico
+        periodoAcademicoComboBox.setItems(periodoAcademicoController.findAll());
+        periodoAcademicoComboBox.setItemLabelGenerator(PeriodoAcademico::getNombrePeriodo);
+
+        // Configurar el formulario
+        formLayout.add(nombreField, codigoField, periodoAcademicoComboBox);
+
+        // Configurar los botones
+        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        saveButton.addClickListener(event -> saveAsignatura());
+
+        deleteButton.addClickListener(event -> clearForm());
+
+        // Configurar el Grid
+        asignaturaGrid.addColumn(Asignatura::getNombre).setHeader("Nombre");
+        asignaturaGrid.addColumn(Asignatura::getCodigo).setHeader("Código");
+        asignaturaGrid.addColumn(asignatura -> 
+            asignatura.getPeriodoAcademico() != null ? asignatura.getPeriodoAcademico().getNombrePeriodo() : "N/A")
+            .setHeader("Período Académico");
+
+        asignaturaGrid.addComponentColumn(a -> {
+             Button updateButton = new Button("Actualizar");
+             updateButton.addClickListener(e -> selectAsignatura(a));
+                return updateButton;
+         });
+
+        asignaturaGrid.addComponentColumn(periodo -> {
+            Button deleteButton = new Button("Eliminar");
+            deleteButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+            deleteButton.addClickListener(e -> {
+                // Crear el cuadro de diálogo de confirmación
+                ConfirmDialog confirmDialog = new ConfirmDialog();
+                confirmDialog.setHeader("Confirmar eliminación");
+                confirmDialog.setText("¿Estás seguro de que quieres eliminar a esta asignatura :O?");
+                
+                // Configurar el botón de confirmación para eliminar
+                confirmDialog.setConfirmButton("Eliminar!", event -> {
+                    // Lógica para eliminar el asignatura
+                    asignaturaController.deleteById(periodo.getId_asignatura());
+                    Notification.show("Periodo Académico eliminado");
+                    actualizarListaAsignaturas(); // Refrescar la tabla para reflejar los cambios
+                });
+        
+                // Configuracion el botón de cancelar
+                confirmDialog.setCancelButton("Cancelar", event -> {
+                    // Cerrar el cuadro de diaklog sin hacer nada
+                    confirmDialog.close();
+                });
+                // Abrir el cuadro 
+                confirmDialog.open();
+            });
+            return deleteButton;
+        });
+        
+        asignaturaGrid.setSelectionMode(Grid.SelectionMode.SINGLE);
+        asignaturaGrid.asSingleSelect().addValueChangeListener(event -> selectAsignatura(event.getValue()));
+
+        // Cargar los datos en el Grid
+        actualizarListaAsignaturas();
+
+        // Configurar layout
+        HorizontalLayout buttonLayout = new HorizontalLayout(saveButton, deleteButton);
+        VerticalLayout layout = getContent();
+        layout.add(title, formLayout, buttonLayout, asignaturaGrid);
+    }
+
+    private void saveAsignatura() {
+        try {
+        // Verificar que los campos no estén vacíos
+        if (nombreField.getValue().isEmpty() || codigoField.getValue().isEmpty()) {
+            Notification.show("Por favor completa todos los campos requeridos", 3000, Notification.Position.MIDDLE);
+            return;
+        }
+    
+        // Verificar que se haya seleccionado un Período Académico
+        if (periodoAcademicoComboBox.getValue() == null) {
+            Notification.show("Debe seleccionar un período académico", 3000, Notification.Position.MIDDLE);
+            return;
+        }
+    
+        // Si no hay asignatura seleccionada, crear una nueva
+        if (asignaturaSeleccionada == null) {
+            asignaturaSeleccionada = new Asignatura();
+        }
+    
+        // Establecer los valores en la asignatura
+        asignaturaSeleccionada.setNombre(nombreField.getValue());
+        asignaturaSeleccionada.setCodigo(codigoField.getValue());
+        asignaturaSeleccionada.setPeriodoAcademico(periodoAcademicoComboBox.getValue());
+    
+        // Guardar la asignatura
+        asignaturaController.save(asignaturaSeleccionada);
+    
+        // Mostrar notificación de éxito
+        Notification.show("Asignatura guardada con éxito", 3000, Notification.Position.MIDDLE);
+    
+        // Actualizar el Grid de asignaturas y limpiar el formulario
+        actualizarListaAsignaturas();
+        clearForm();
+    } catch (Exception e) {
+        Notification.show("Error al guardar la asignatura: " + e.getMessage(), 5000, Notification.Position.MIDDLE);
+        e.printStackTrace(); // Log completo en consola
+    }
+    }
+
+    private void selectAsignatura(Asignatura asignatura) {
+        if (asignatura != null) {
+            asignaturaSeleccionada = asignatura;
+            nombreField.setValue(asignatura.getNombre() != null ? asignatura.getNombre() : "");
+            codigoField.setValue(asignatura.getCodigo() != null ? asignatura.getCodigo() : "");
+            periodoAcademicoComboBox.setValue(asignatura.getPeriodoAcademico());
+        } else {
+            clearForm();
+        }
+    }
+
+    private void clearForm() {
+        nombreField.clear();
+        codigoField.clear();
+        periodoAcademicoComboBox.clear();
+        asignaturaSeleccionada = null;
+    }
+
+    private void actualizarListaAsignaturas() {
+        asignaturaGrid.setItems(asignaturaController.findAll());
     }
 }
