@@ -1,45 +1,207 @@
-# EduControl
+# EduControl 🎓📚
 
-This project can be used as a starting point to create your own Vaadin application with Spring Boot.
-It contains all the necessary configuration and some placeholder files to get you started.
+**EduControl** es una aplicación web desarrollada con **Java 17**, **Spring Boot**, **Vaadin 24**, **Hibernate (JPA)** y **MariaDB**, diseñada para facilitar la gestión académica en centros educativos. La arquitectura está organizada en capas: `modelos`, `controlador`, `servicios` y `views`. Ofrece una interfaz moderna, validaciones integradas, confirmaciones de acciones, importación de datos desde Excel, y exportación en PDF.
 
-## Running the application
+---
 
-The project is a standard Maven project. To run it from the command line,
-type `mvnw` (Windows), or `./mvnw` (Mac & Linux), then open
-http://localhost:8080 in your browser.
+## 🛠 Tecnologías principales
 
-You can also import the project to your IDE of choice as you would with any
-Maven project. Read more on [how to import Vaadin projects to different IDEs](https://vaadin.com/docs/latest/guide/step-by-step/importing) (Eclipse, IntelliJ IDEA, NetBeans, and VS Code).
+- Java 17
+- Spring Boot
+- Vaadin 24
+- Hibernate (JPA)
+- MariaDB 
+- Apache POI (importación Excel)
+- iText (exportación PDF)
+- Maven
 
-## Deploying to Production
+---
 
-To create a production build, call `mvnw clean package -Pproduction` (Windows),
-or `./mvnw clean package -Pproduction` (Mac & Linux).
-This will build a JAR file with all the dependencies and front-end resources,
-ready to be deployed. The file can be found in the `target` folder after the build completes.
+## Módulos implementados
 
-Once the JAR file is built, you can run it using
-`java -jar target/educontrol-1.0-SNAPSHOT.jar`
+### Estudiantes
+- Registro de estudiantes con nombre, apellido, correo... etc
+- Validación de campos y confirmación al eliminar.
+- Grid para actualizar o eliminar datos.
 
-## Project structure
+### Profesores
+- Formulario de profesores: nombre, apellido, email, ID, especialidad, dirección.
+- Importación desde archivos `.xlsx`.
+- Confirmación para eliminación, notificaciones y actualizaciones.
 
-- `MainLayout.java` in `src/main/java` contains the navigation setup (i.e., the
-  side/top bar and the main menu). This setup uses
-  [App Layout](https://vaadin.com/docs/components/app-layout).
-- `views` package in `src/main/java` contains the server-side Java views of your application.
-- `views` folder in `src/main/frontend` contains the client-side JavaScript views of your application.
-- `themes` folder in `src/main/frontend` contains the custom CSS styles.
+### Períodos Académicos
+- Registro de nombre, fecha de inicio y fin.
+- Manejo de fechas con `DatePicker` y validación.
+- Confirmación para eliminar y feedback inmediato.
 
-## Useful links
+### Asignaturas
+- CRUD de asignaturas con validaciones.
+- Interfaz limpia, confirmación de acciones y notificaciones.
 
-- Read the documentation at [vaadin.com/docs](https://vaadin.com/docs).
-- Follow the tutorial at [vaadin.com/docs/latest/tutorial/overview](https://vaadin.com/docs/latest/tutorial/overview).
-- Create new projects at [start.vaadin.com](https://start.vaadin.com/).
-- Search UI components and their usage examples at [vaadin.com/docs/latest/components](https://vaadin.com/docs/latest/components).
-- View use case applications that demonstrate Vaadin capabilities at [vaadin.com/examples-and-demos](https://vaadin.com/examples-and-demos).
-- Build any UI without custom CSS by discovering Vaadin's set of [CSS utility classes](https://vaadin.com/docs/styling/lumo/utility-classes). 
-- Find a collection of solutions to common use cases at [cookbook.vaadin.com](https://cookbook.vaadin.com/).
-- Find add-ons at [vaadin.com/directory](https://vaadin.com/directory).
-- Ask questions on [Stack Overflow](https://stackoverflow.com/questions/tagged/vaadin) or join our [Forum](https://vaadin.com/forum).
-- Report issues, create pull requests in [GitHub](https://github.com/vaadin).
+### Horarios
+- Asignación de día, hora, profesor y asignatura.
+- ComboBoxes dinámicos conectados con otras entidades.
+- Validación con `Binder`, actualizaciones y eliminaciones seguras.
+
+### Grupos
+- Asociación de estudiantes a un horario específico.
+- Visualización de horario y estudiante asociados.
+- Configuración de `ComboBox` y validaciones con `Binder`.
+
+### Asistencias
+- Registro de asistencia por estudiante y horario.
+- Checkbox de presente/ausente.
+- Exportación a PDF con estilo personalizado.
+- Confirmación antes de eliminar un registro.
+
+---
+
+## Características adicionales 
+
+- Validaciones en todos los formularios (campos obligatorios, formatos).
+- Confirmación antes de eliminar elementos (`ConfirmDialog`).
+- Notificaciones claras y centradas (`Notification.show()`).
+- Importación de profesores desde Excel (`.xlsx`) con Apache POI.
+- Exportación de asistencias a PDF con iText y descarga directa.
+- Interfaz amigable, basada en `FormLayout`, `Grid`, `ComboBox`, `Dialog`, `TimePicker`, etc.
+
+---
+
+## Cómo ejecutar el proyecto
+
+1. Clona el repositorio:
+   ```bash
+   git clone https://github.com/martkevz/Educontrol.git
+   ``` 
+2. Crea la base de datos educontrol.
+  
+3. Edita src/main/resources/application.properties:
+    ```bash 
+    spring.datasource.url=jdbc:mysql://localhost:3306/educontrol
+    spring.datasource.username=TU_USUARIO
+    spring.datasource.password=TU_PASSWORD
+    spring.jpa.hibernate.ddl-auto=create
+   ```
+    
+5. Construye y corre con Maven:
+   ```bash 
+    mvn clean package
+   ```
+   ```bash 
+   mvn spring-boot:run
+   ```
+6. Abre http://localhost:8080 desde tu navegador.
+
+---
+
+## *Capturas de Pantalla*
+
+Inicio: 
+
+<div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
+
+<img src="screenshots/inicioEducontrol.JPG" 
+     alt="Inicio de Educontrol" 
+     width="600"
+     style="border: 1px solid #eee; 
+            border-radius: 8px; 
+            padding: 8px; 
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;">
+
+### 1. Módulo Estudiantes:
+<img src="screenshots/moduloEstudiantes.PNG" 
+     alt="Modulo Estudiantes" 
+     width="600"
+     style="border: 1px solid #eee; 
+            border-radius: 8px; 
+            padding: 8px; 
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;">
+
+### 2. Módulo Profesores:
+<img src="screenshots/moduloProfesores.PNG" 
+     alt="Modulo Profesores" 
+     width="600"
+     style="border: 1px solid #eee; 
+            border-radius: 8px; 
+            padding: 8px; 
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;">
+
+### 3. Módulo Periodos:
+<img src="screenshots/moduloPeriodos.PNG" 
+     alt="Modulo Periodos" 
+     width="600"
+     style="border: 1px solid #eee; 
+            border-radius: 8px; 
+            padding: 8px; 
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;">
+
+### 4. Módulo Asignaturas:
+<img src="screenshots/moduloAsignaturas.PNG" 
+     alt="Modulo Asignaturas" 
+     width="600"
+     style="border: 1px solid #eee; 
+            border-radius: 8px; 
+            padding: 8px; 
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;">
+
+### 5. Módulo Horarios:
+<img src="screenshots/moduloHorarios.PNG" 
+     alt="Modulo Horarios" 
+     width="600"
+     style="border: 1px solid #eee; 
+            border-radius: 8px; 
+            padding: 8px; 
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;">
+
+### 6. Módulo Grupos:
+<img src="screenshots/moduloGrupos.PNG" 
+     alt="Modulo Grupos" 
+     width="600"
+     style="border: 1px solid #eee; 
+            border-radius: 8px; 
+            padding: 8px; 
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;">
+
+### 7. Módulo Asistencias:
+<img src="screenshots/moduloAsistencias.PNG" 
+     alt="Modulo Asistencias" 
+     width="600"
+     style="border: 1px solid #eee; 
+            border-radius: 8px; 
+            padding: 8px; 
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;">
+<div/>
+
+---
+
+## 👥 Equipo de desarrolladores
+
+Kevin Martínez  – martinezguillenk5@gmail.com
+
+Jennifer Pleitez – jennjennp7@gmail.com
+
+---
+
+## Licencia
+
+Código disponible bajo licencia MIT. Verifica detalles en el archivo [LICENSE](https://github.com/martkevz/Educontrol/blob/main/LICENSE.md).
+Proyecto académico sin fines comerciales. Puedes modificarlo y adaptarlo con fines educativos.
+
+---
+
