@@ -194,7 +194,7 @@ Inicio:
 
 Kevin Martínez  – martinezguillenk5@gmail.com
 
-Jennifer Pleitez – jennjennp7@gmail.com
+Jennifer Pleitez – jennifer.rpleitez@gmail.com
 
 ---
 
